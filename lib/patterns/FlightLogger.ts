@@ -1,6 +1,13 @@
+// ==========================================
+// SINGLETON PATTERN - Sistema de Log
+// ==========================================
+
+export type LogType = "CHECK_IN" | "DELAY" | "STATE_CHANGE" | "ASSIGN" | "INFO";
+
 export interface LogEntry {
+  id: string;
   timestamp: string;
-  type: "CHECK_IN" | "DELAY" | "NOTIFICATION" | "INFO";
+  type: LogType;
   message: string;
 }
 
@@ -9,7 +16,7 @@ export class FlightLogger {
   private logs: LogEntry[] = [];
 
   private constructor() {
-    this.log("INFO", "🚀 Sistema de log inicializado (instancia única)");
+    this.log("INFO", "🚀 Sistema de log inicializado (instancia única Singleton)");
   }
 
   static getInstance(): FlightLogger {
@@ -19,17 +26,17 @@ export class FlightLogger {
     return FlightLogger.instance;
   }
 
-  log(type: LogEntry["type"], message: string): void {
-    const entry: LogEntry = {
+  log(type: LogType, message: string): void {
+    this.logs.push({
+      id: `log-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       timestamp: new Date().toLocaleTimeString("es-ES"),
       type,
       message,
-    };
-    this.logs.push(entry);
+    });
   }
 
   getLogs(): LogEntry[] {
-    return [...this.logs];
+    return [...this.logs].reverse(); // más reciente primero
   }
 
   clearLogs(): void {

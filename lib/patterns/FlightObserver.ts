@@ -1,74 +1,57 @@
+// ==========================================
+// OBSERVER PATTERN - Pasajeros y Notificaciones
+// ==========================================
+
+export interface Notification {
+  id: string;
+  flightNumber: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+}
+
+// Observer interface
 export interface FlightObserver {
   id: string;
   name: string;
+  email: string;
   notify(flightNumber: string, message: string): void;
+  getNotifications(): Notification[];
+  markAllRead(): void;
 }
 
+// Concrete Observer - Pasajero
 export class Passenger implements FlightObserver {
   id: string;
   name: string;
-  private notifications: string[] = [];
+  email: string;
+  private notifications: Notification[] = [];
 
-  constructor(id: string, name: string) {
+  constructor(id: string, name: string, email: string) {
     this.id = id;
     this.name = name;
+    this.email = email;
   }
 
   notify(flightNumber: string, message: string): void {
-    this.notifications.push(`📱 [${flightNumber}] ${message}`);
-  }
-
-  getNotifications(): string[] {
-    return [...this.notifications];
-  }
-}
-
-export class Flight {
-  private observers: FlightObserver[] = [];
-  private flightNumber: string;
-  private isDelayed: boolean = false;
-  private delayMinutes: number = 0;
-
-  constructor(flightNumber: string) {
-    this.flightNumber = flightNumber;
-  }
-
-  subscribe(observer: FlightObserver): void {
-    this.observers.push(observer);
-  }
-
-  unsubscribe(observerId: string): void {
-    this.observers = this.observers.filter((o) => o.id !== observerId);
-  }
-
-  private notifyAll(message: string): void {
-    this.observers.forEach((observer) => {
-      observer.notify(this.flightNumber, message);
+    this.notifications.push({
+      id: `notif-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      flightNumber,
+      message,
+      timestamp: new Date().toLocaleTimeString("es-ES"),
+      read: false,
     });
   }
 
-  setDelay(minutes: number): void {
-    this.isDelayed = true;
-    this.delayMinutes = minutes;
-    this.notifyAll(`⚠️ Su vuelo se retrasa ${minutes} minutos. Nueva salida estimada actualizada.`);
+  getNotifications(): Notification[] {
+    return [...this.notifications];
   }
 
-  cancelDelay(): void {
-    this.isDelayed = false;
-    this.delayMinutes = 0;
-    this.notifyAll(`✅ El retraso fue cancelado. Vuelo en horario normal.`);
+  getUnreadCount(): number {
+    return this.notifications.filter((n) => !n.read).length;
   }
 
-  getInfo() {
-    return {
-      flightNumber: this.flightNumber,
-      isDelayed: this.isDelayed,
-      delayMinutes: this.delayMinutes,
-      passengerCount: this.observers.length,
-    };
-  }
-
-  getObservers(): FlightObserver[] {
-    return [...this.observers];
+  markAllRead(): void {
+    this.notifications = this.notifications.map((n) => ({ ...n, read: true }));
   }
 }
